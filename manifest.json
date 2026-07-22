@@ -4,11 +4,11 @@
   "start_url": "/salary/",
   "scope": "/salary/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "909eac",
+  "theme_color": "c8dbe9",
   "icons": [
     {
-      "src": "https://i.ibb.co/PZQt3hvn/Resizer-17847576239321.png",
+      "src": "https://i.ibb.co/KxqP2H7R/70836-11zon.png",
       "sizes": "192x192 512x512",
       "type": "image/png"
     }
