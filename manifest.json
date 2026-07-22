@@ -1,0 +1,16 @@
+{
+  "name": "رواتب مديرية غاز جنوب المنطقة الوسطى",
+  "short_name": "رواتب الجنوب",
+  "start_url": "/salary/",
+  "scope": "/salary/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/PsVt0MSx/Kyo-Tux-Aeon-Misc-Document-256.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
