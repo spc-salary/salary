@@ -4,7 +4,7 @@
   "start_url": "/salary/",
   "scope": "/salary/",
   "display": "standalone",
-  "background_color": "909eac",
+  "background_color": "#909eac",
   "theme_color": "#c8dbe9",
   "icons": [
     {
