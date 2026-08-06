@@ -104,7 +104,7 @@
             gap: 0;
         }
 
-        /* ===== أيقونة الطاقة / اللهب ===== */
+        /* ===== حاوية الشعار ===== */
         .flame-wrapper {
             position: relative;
             width: 100px;
@@ -117,11 +117,11 @@
             position: absolute;
             inset: 0;
             border-radius: 50%;
-            border: 2px solid rgba(255,165,0,0.3);
+            border: 2px solid rgba(255,255,255,0.25);
             animation: ring-expand 2s ease-out infinite;
         }
-        .flame-ring:nth-child(2) { animation-delay: 0.7s; border-color: rgba(255,200,50,0.2); }
-        .flame-ring:nth-child(3) { animation-delay: 1.4s; border-color: rgba(255,100,0,0.15); }
+        .flame-ring:nth-child(2) { animation-delay: 0.7s; border-color: rgba(200,219,233,0.2); }
+        .flame-ring:nth-child(3) { animation-delay: 1.4s; border-color: rgba(255,255,255,0.12); }
 
         @keyframes ring-expand {
             0%   { transform: scale(0.85); opacity: 0.8; }
@@ -136,15 +136,17 @@
             justify-content: center;
         }
 
-        .flame-icon svg {
+        /* ===== الشعار الجديد ===== */
+        .logo-img {
             width: 56px;
             height: 56px;
-            filter: drop-shadow(0 0 16px rgba(255, 160, 0, 0.8));
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
         }
 
         @keyframes pulse-glow {
-            0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 20px rgba(255,140,0,0.4)); }
-            50%       { transform: scale(1.06); filter: drop-shadow(0 0 35px rgba(255,140,0,0.7)); }
+            0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 18px rgba(200,219,233,0.4)); }
+            50%       { transform: scale(1.06); filter: drop-shadow(0 0 30px rgba(200,219,233,0.7)); }
         }
 
         /* ===== النص ===== */
@@ -337,35 +339,17 @@
         <!-- المحتوى المركزي -->
         <div class="loader-content">
 
-            <!-- أيقونة اللهب / الطاقة -->
+            <!-- ===== الشعار الجديد (بدل أيقونة اللهب) ===== -->
             <div class="flame-wrapper">
                 <div class="flame-ring"></div>
                 <div class="flame-ring"></div>
                 <div class="flame-ring"></div>
                 <div class="flame-icon">
-                    <!-- أيقونة لهب الغاز SVG -->
-                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <!-- لهب خارجي -->
-                        <path d="M32 6 C32 6 20 20 20 34 C20 44 25.5 52 32 56 C38.5 52 44 44 44 34 C44 20 32 6 32 6Z"
-                              fill="url(#flame-outer)" opacity="0.9"/>
-                        <!-- لهب داخلي -->
-                        <path d="M32 22 C32 22 25 31 25 38 C25 44 28.2 49 32 51 C35.8 49 39 44 39 38 C39 31 32 22 32 22Z"
-                              fill="url(#flame-inner)" opacity="0.95"/>
-                        <!-- نقطة لمعة -->
-                        <ellipse cx="28" cy="30" rx="3" ry="5" fill="rgba(255,255,255,0.35)" transform="rotate(-15 28 30)"/>
-                        <defs>
-                            <linearGradient id="flame-outer" x1="32" y1="6" x2="32" y2="56" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%"   stop-color="#ff6b00"/>
-                                <stop offset="50%"  stop-color="#ffa500"/>
-                                <stop offset="100%" stop-color="#ffd700"/>
-                            </linearGradient>
-                            <linearGradient id="flame-inner" x1="32" y1="22" x2="32" y2="51" gradientUnits="userSpaceOnUse">
-                                <stop offset="0%"   stop-color="#fff0a0"/>
-                                <stop offset="60%"  stop-color="#ffe066"/>
-                                <stop offset="100%" stop-color="#ffcc00"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
+                    <img
+                        class="logo-img"
+                        src="https://i.ibb.co/KxqP2H7R/70836-11zon.png"
+                        alt="شعار مديرية غاز جنوب المنطقة الوسطى"
+                    />
                 </div>
             </div>
 
