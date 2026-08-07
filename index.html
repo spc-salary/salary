@@ -455,5 +455,17 @@
         // احتياطي: إخفاء بعد 12 ثانية إذا لم يُطلق onload
         setTimeout(hideLoader, 12000);
     </script>
+
+    <script>
+        // تسجيل Service Worker مرة واحدة ضمن مسار GitHub Pages الفرعي.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./sw.js', { scope: './' })
+                    .catch(function () {
+                        // يبقى الموقع قابلاً للاستخدام حتى عند عدم دعم Service Worker.
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
