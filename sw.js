@@ -1,10 +1,46 @@
-const CACHE_NAME = 'salary-pwa-v1';
-const APP_SHELL = ['./index.html', './manifest.json'];
+/*
+ * The worker can control only the GitHub Pages origin that serves this file.
+ * It cannot control, inspect, or cache the Google Apps Script iframe document
+ * because that document belongs to a different origin.
+ */
+const CACHE_NAME = 'salary-pwa-v2';
+const CACHE_PREFIX = 'salary-pwa-';
+const APP_SHELL_PATHS = ['./index.html', './manifest.json'];
+const STATIC_DESTINATIONS = new Set([
+  'style',
+  'script',
+  'image',
+  'font',
+  'manifest',
+  'worker',
+]);
+
+const scopeUrl = () => new URL(self.registration.scope);
+
+const appShellUrl = (path) => new URL(path, scopeUrl()).href;
+
+const isWithinScope = (url) => {
+  const scope = scopeUrl();
+  return url.origin === scope.origin && url.pathname.startsWith(scope.pathname);
+};
+
+const isCacheableResponse = (response) =>
+  response && (response.ok || response.type === 'opaque');
+
+const putInCache = (request, response) => {
+  if (!isCacheableResponse(response)) {
+    return Promise.resolve();
+  }
+
+  return caches.open(CACHE_NAME)
+    .then((cache) => cache.put(request, response.clone()))
+    .catch(() => undefined);
+};
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then((cache) => cache.addAll(APP_SHELL_PATHS.map(appShellUrl)))
       .then(() => self.skipWaiting())
   );
 });
@@ -14,7 +50,9 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((cacheNames) => Promise.all(
         cacheNames
-          .filter((cacheName) => cacheName.startsWith('salary-pwa-') && cacheName !== CACHE_NAME)
+          .filter((cacheName) =>
+            cacheName.startsWith(CACHE_PREFIX) && cacheName !== CACHE_NAME
+          )
           .map((cacheName) => caches.delete(cacheName))
       ))
       .then(() => self.clients.claim())
@@ -29,10 +67,38 @@ self.addEventListener('fetch', (event) => {
   }
 
   const requestUrl = new URL(request.url);
-  const workerScope = new URL(self.registration.scope);
+  const sameOrigin = requestUrl.origin === self.location.origin;
 
-  // Never intercept external resources, APIs, or the Google Apps Script iframe.
-  if (requestUrl.origin !== self.location.origin || !requestUrl.href.startsWith(workerScope.href)) {
+  /*
+   * A cross-origin iframe navigation must pass through untouched. This is
+   * essential for Google Apps Script and avoids pretending its dynamic
+   * server-side functions work offline.
+   */
+  if (!sameOrigin) {
+    if (
+      request.mode !== 'navigate' &&
+      STATIC_DESTINATIONS.has(request.destination) &&
+      request.mode === 'no-cors'
+    ) {
+      /*
+       * Best effort only: when the browser dispatches a static cross-origin
+       * subresource through this worker, an opaque response can be cached.
+       * The Google iframe's own document/resources normally remain outside
+       * this worker's control and therefore are not affected.
+       */
+      event.respondWith(
+        fetch(request)
+          .then((response) => {
+            event.waitUntil(putInCache(request, response));
+            return response;
+          })
+          .catch(() => caches.match(request))
+      );
+    }
+    return;
+  }
+
+  if (!isWithinScope(requestUrl)) {
     return;
   }
 
@@ -40,31 +106,35 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response.ok) {
-            const responseCopy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', responseCopy));
-          }
+          event.waitUntil(putInCache(appShellUrl('./index.html'), response));
           return response;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match(appShellUrl('./index.html')))
     );
     return;
   }
 
-  const staticDestinations = new Set(['style', 'script', 'image', 'font', 'manifest', 'worker']);
-
-  if (!staticDestinations.has(request.destination)) {
+  if (!STATIC_DESTINATIONS.has(request.destination)) {
     return;
   }
 
+  /*
+   * Cache-first gives the shell a reliable offline path. A successful network
+   * response refreshes the entry so the next visit receives the new version.
+   */
   event.respondWith(
     caches.match(request)
-      .then((cachedResponse) => cachedResponse || fetch(request).then((response) => {
-        if (response.ok) {
-          const responseCopy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseCopy));
-        }
-        return response;
-      }))
+      .then((cachedResponse) => {
+        const networkResponse = fetch(request)
+          .then((response) => {
+            event.waitUntil(putInCache(request, response));
+            return response;
+          })
+          .catch(() => undefined);
+
+        return cachedResponse || networkResponse.then(
+          (response) => response || Response.error()
+        );
+      })
   );
 });
