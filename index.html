@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <!-- ربط ملف الـ Manifest بمساره الصحيح داخل المجلد الفرعي -->
+    <link rel="manifest" href="/salary/manifest.json">
+    <meta name="theme-color" content="c8dbe9">
+    <title>الاستعلام عن الرواتب - مديرية غاز الجنوب</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base target="_top">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+            overflow: hidden;
+        }
+
+        /* ===== شاشة التحميل ===== */
+        #loader-container {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(160deg, #0a3a5c 0%, #0e5280 40%, #1a7ab5 70%, #0d4f75 100%);
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        #loader-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* ===== خلفية جزيئات النفط والغاز ===== */
+        .bg-particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.08;
+            background: #ffffff;
+            animation: float-up linear infinite;
+        }
+
+        .particle:nth-child(1)  { width: 8px;  height: 8px;  left: 10%; animation-duration: 8s;  animation-delay: 0s;  }
+        .particle:nth-child(2)  { width: 5px;  height: 5px;  left: 25%; animation-duration: 11s; animation-delay: 2s;  }
+        .particle:nth-child(3)  { width: 12px; height: 12px; left: 40%; animation-duration: 7s;  animation-delay: 1s;  }
+        .particle:nth-child(4)  { width: 6px;  height: 6px;  left: 55%; animation-duration: 9s;  animation-delay: 3s;  }
+        .particle:nth-child(5)  { width: 10px; height: 10px; left: 70%; animation-duration: 12s; animation-delay: 0.5s;}
+        .particle:nth-child(6)  { width: 4px;  height: 4px;  left: 85%; animation-duration: 6s;  animation-delay: 4s;  }
+        .particle:nth-child(7)  { width: 7px;  height: 7px;  left: 15%; animation-duration: 10s; animation-delay: 1.5s;}
+        .particle:nth-child(8)  { width: 9px;  height: 9px;  left: 60%; animation-duration: 8.5s;animation-delay: 2.5s;}
+        .particle:nth-child(9)  { width: 5px;  height: 5px;  left: 90%; animation-duration: 13s; animation-delay: 0.8s;}
+        .particle:nth-child(10) { width: 11px; height: 11px; left: 45%; animation-duration: 7.5s;animation-delay: 3.5s;}
+
+        @keyframes float-up {
+            0%   { transform: translateY(110vh) scale(0.5); opacity: 0; }
+            10%  { opacity: 0.08; }
+            90%  { opacity: 0.08; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+
+        /* ===== خطوط النفط المتحركة خلف ===== */
+        .pipe-line {
+            position: absolute;
+            background: rgba(255,255,255,0.04);
+            border-radius: 2px;
+        }
+        .pipe-line.h { height: 3px; width: 100%; animation: pipe-flow-h 4s linear infinite; }
+        .pipe-line.v { width: 3px;  height: 100%; animation: pipe-flow-v 5s linear infinite; }
+        .pipe-line:nth-child(1) { top: 20%; }
+        .pipe-line:nth-child(2) { top: 60%; animation-delay: 1.5s; }
+        .pipe-line:nth-child(3) { top: 80%; animation-delay: 0.8s; }
+        .pipe-line:nth-child(4) { left: 15%; }
+        .pipe-line:nth-child(5) { left: 75%; animation-delay: 2s; }
+
+        @keyframes pipe-flow-h {
+            0%   { background-position: -100% 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent); background-size: 40% 100%; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes pipe-flow-v {
+            0%   { background: linear-gradient(180deg, transparent, rgba(255,255,255,0.10), transparent); background-size: 100% 40%; background-position: 0 -100%; }
+            100% { background-position: 0 200%; }
+        }
+
+        /* ===== المحتوى المركزي ===== */
+        .loader-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* ===== حاوية الشعار ===== */
+        .flame-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 24px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .flame-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.25);
+            animation: ring-expand 2s ease-out infinite;
+        }
+        .flame-ring:nth-child(2) { animation-delay: 0.7s; border-color: rgba(200,219,233,0.2); }
+        .flame-ring:nth-child(3) { animation-delay: 1.4s; border-color: rgba(255,255,255,0.12); }
+
+        @keyframes ring-expand {
+            0%   { transform: scale(0.85); opacity: 0.8; }
+            100% { transform: scale(1.6);  opacity: 0; }
+        }
+
+        .flame-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== الشعار الجديد ===== */
+        .logo-img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 18px rgba(200,219,233,0.4)); }
+            50%       { transform: scale(1.06); filter: drop-shadow(0 0 30px rgba(200,219,233,0.7)); }
+        }
+
+        /* ===== النص ===== */
+        .org-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.2s;
+        }
+
+        .main-title {
+            font-size: clamp(20px, 5vw, 28px);
+            font-weight: 900;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.4s;
+            margin-bottom: 6px;
+        }
+
+        .sub-title {
+            font-size: clamp(14px, 3vw, 17px);
+            font-weight: 600;
+            color: rgba(255, 190, 80, 0.95);
+            text-align: center;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.6s;
+            margin-bottom: 40px;
+        }
+
+        @keyframes fade-in-up {
+            0%   { opacity: 0; transform: translateY(18px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== شريط التقدم ===== */
+        .progress-wrapper {
+            width: min(320px, 80vw);
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.8s;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.55);
+            font-weight: 600;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24, #fcd34d);
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+            animation: progress-fill 2.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 1s;
+        }
+
+        @keyframes progress-fill {
+            0%   { width: 0%; }
+            30%  { width: 35%; }
+            60%  { width: 65%; }
+            85%  { width: 88%; }
+            100% { width: 95%; }
+        }
+
+        /* شيمر على شريط التقدم */
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+            animation: shimmer 1.5s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+
+        /* ===== نص الحالة ===== */
+        .status-text {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 14px;
+            min-height: 18px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 1s;
+        }
+
+        /* ===== الزخرفة السفلية (خط فاصل مزخرف) ===== */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.7s;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,165,0,0.5), transparent);
+            width: 60px;
+        }
+
+        .divider-diamond {
+            width: 6px;
+            height: 6px;
+            background: #f59e0b;
+            transform: rotate(45deg);
+            box-shadow: 0 0 8px rgba(245,158,11,0.8);
+        }
+
+        /* ===== الشعار السفلي ===== */
+        .footer-badge {
+            position: absolute;
+            bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 1.2s;
+        }
+
+        .footer-badge span {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .footer-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== شاشة التحميل الاحترافية ===== -->
+    <div id="loader-container">
+
+        <!-- خلفية الجزيئات -->
+        <div class="bg-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+
+        <!-- خطوط الأنابيب -->
+        <div class="pipe-line h" style="top:20%"></div>
+        <div class="pipe-line h" style="top:60%"></div>
+        <div class="pipe-line h" style="top:80%"></div>
+        <div class="pipe-line v" style="left:15%"></div>
+        <div class="pipe-line v" style="left:75%"></div>
+
+        <!-- المحتوى المركزي -->
+        <div class="loader-content">
+
+            <!-- ===== الشعار الجديد (بدل أيقونة اللهب) ===== -->
+            <div class="flame-wrapper">
+                <div class="flame-ring"></div>
+                <div class="flame-ring"></div>
+                <div class="flame-ring"></div>
+                <div class="flame-icon">
+                    <img
+                        class="logo-img"
+                        src="https://i.ibb.co/KxqP2H7R/70836-11zon.png"
+                        alt="شعار مديرية غاز جنوب المنطقة الوسطى"
+                    />
+                </div>
+            </div>
+
+            <!-- عنوان الجهة -->
+            <div class="org-title">السورية للبترول - spc</div>
+
+            <!-- العنوان الرئيسي -->
+            <div class="main-title">مديرية غاز جنوب المنطقة الوسطى</div>
+
+            <!-- العنوان الفرعي -->
+            <div class="sub-title">نظام الاستعلام عن الرواتب</div>
+
+            <!-- فاصل مزخرف -->
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-diamond"></div>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- شريط التقدم -->
+            <div class="progress-wrapper">
+                <div class="progress-labels">
+                    <span class="progress-label">جارٍ التحميل…</span>
+                    <span class="progress-label" id="pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="status-text" id="status-text">يرجى الانتظار، يتم الاتصال بالنظام</div>
+            </div>
+        </div>
+
+        <!-- شارة تذييلية -->
+        <div class="footer-badge">
+            <span>نظام الرواتب الإلكتروني</span>
+            <div class="footer-dot"></div>
+            <span>2026</span>
+        </div>
+    </div>
+
+    <!-- الـ iframe الأصلي -->
+    <iframe id="myIframe"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+        src="https://script.google.com/macros/s/AKfycbzbT3OFCIRljutgpP0XhATpOqW3cKKAtFzWPDPE18vS91bjsdzBrFH59BGNUNBwIUmHpA/exec">
+    </iframe>
+
+    <script>
+        // ===== تحديث نسبة التقدم ومسميات الحالة =====
+        var statusMessages = [
+            'يرجى الانتظار، يتم الاتصال بالنظام',
+            'جارٍ التحقق من الصلاحيات…',
+            'يتم تحميل بيانات الرواتب…',
+            'اكتمل التحميل، جارٍ الفتح…'
+        ];
+
+        var pctEl    = document.getElementById('pct');
+        var statusEl = document.getElementById('status-text');
+        var fillEl   = document.getElementById('progress-fill');
+        var loader   = document.getElementById('loader-container');
+        var iframe   = document.getElementById('myIframe');
+
+        // مزامنة نص النسبة مع حركة شريط التقدم
+        var startTime = Date.now();
+        var duration  = 3800; // ms — يتوافق تقريباً مع progress-fill animation
+
+        function animatePct() {
+            var elapsed  = Date.now() - startTime;
+            var progress = Math.min(elapsed / duration, 1);
+            // منحنى cubic-bezier تقريبي
+            var eased = progress < 0.5
+                ? 2 * progress * progress
+                : -1 + (4 - 2 * progress) * progress;
+            var pct = Math.round(eased * 95);
+            pctEl.textContent = pct + '%';
+
+            // تحديث رسالة الحالة
+            var msgIdx = pct < 30 ? 0 : pct < 55 ? 1 : pct < 80 ? 2 : 3;
+            statusEl.textContent = statusMessages[msgIdx];
+
+            if (progress < 1) {
+                requestAnimationFrame(animatePct);
+            }
+        }
+        requestAnimationFrame(animatePct);
+
+        // ===== إخفاء شاشة التحميل عند تحميل الـ iframe =====
+        function hideLoader() {
+            pctEl.textContent    = '100%';
+            statusEl.textContent = 'تم التحميل بنجاح ?';
+            fillEl.style.transition = 'width 0.3s ease';
+            fillEl.style.width      = '100%';
+
+            setTimeout(function () {
+                loader.classList.add('hidden');
+                setTimeout(function () {
+                    loader.style.display = 'none';
+                }, 850);
+            }, 400);
+        }
+
+        iframe.onload = hideLoader;
+
+        // احتياطي: إخفاء بعد 12 ثانية إذا لم يُطلق onload
+        setTimeout(hideLoader, 12000);
+    </script>
+</body>
+</html>
