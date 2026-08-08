@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
-    <!-- ربط ملف الـ Manifest بمساره الصحيح داخل المجلد الفرعي -->
-    <link rel="manifest" href="/salary/manifest.json">
-    <meta name="theme-color" content="c8dbe9">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#c8dbe9">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="رواتب الجنوب">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/KxqP2H7R/70836-11zon.png">
+    <link rel="icon" href="https://i.ibb.co/KxqP2H7R/70836-11zon.png">
     <title>الاستعلام عن الرواتب - مديرية غاز الجنوب</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <base target="_top">
@@ -457,7 +462,7 @@
     </script>
 
     <script>
-        // تسجيل Service Worker مرة واحدة ضمن مسار GitHub Pages الفرعي.
+        // تسجيل Service Worker لتفعيل خاصية PWA (تثبيت التطبيق والعمل دون اتصال).
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function () {
                 navigator.serviceWorker.register('./sw.js', { scope: './' })
