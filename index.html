@@ -1,513 +1,459 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <base target="_top">
-  <title>الاستعلام عن الرواتب - قسم غاز الجنوب</title>
-  <meta name="theme-color" content="c8dbe9">
-  <link rel="manifest" href="/salary/manifest.json">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+    <!-- ربط ملف الـ Manifest بمساره الصحيح داخل المجلد الفرعي -->
+    <link rel="manifest" href="/salary/manifest.json">
+    <meta name="theme-color" content="c8dbe9">
+    <title>الاستعلام عن الرواتب - قسم غاز الجنوب</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base target="_top">
 
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; min-height: 100%; margin: 0; overflow: hidden; }
-    body { background: #071421; color: #e8f0f2; font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; }
-    button { font: inherit; }
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
 
-    .salary-app {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      height: 100dvh;
-      min-height: 100%;
-      overflow: hidden;
-      background: #071421;
-      direction: rtl;
-    }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .site-frame {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: #f4f7f8;
-    }
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+            overflow: hidden;
+        }
 
-    .loader-container {
-      position: fixed;
-      z-index: 10;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      padding: max(24px, env(safe-area-inset-top)) 22px max(24px, env(safe-area-inset-bottom));
-      background:
-        radial-gradient(ellipse at 50% 43%, rgba(34, 108, 126, .20), transparent 42%),
-        linear-gradient(145deg, #071523 0%, #0a1e30 54%, #0a2536 100%);
-      opacity: 1;
-      visibility: visible;
-      transition: opacity .72s cubic-bezier(.2,.7,.25,1), visibility 0s linear 0s;
-    }
+        /* ===== شاشة التحميل ===== */
+        #loader-container {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: linear-gradient(160deg, #0a3a5c 0%, #0e5280 40%, #1a7ab5 70%, #0d4f75 100%);
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
 
-    .loader-container::before {
-      position: absolute;
-      inset: 0;
-      content: "";
-      opacity: .28;
-      pointer-events: none;
-      background-image: radial-gradient(rgba(183, 219, 223, .2) .65px, transparent .65px);
-      background-size: 28px 28px;
-      mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 77%, transparent);
-    }
+        #loader-container.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
 
-    .loader-container::after {
-      position: absolute;
-      inset: 18px;
-      border: 1px solid rgba(161, 196, 203, .12);
-      border-radius: 18px;
-      content: "";
-      pointer-events: none;
-    }
+        /* ===== خلفية جزيئات النفط والغاز ===== */
+        .bg-particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
 
-    .loader-container.is-hidden {
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity .72s cubic-bezier(.2,.7,.25,1), visibility 0s linear .72s;
-    }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.08;
+            background: #ffffff;
+            animation: float-up linear infinite;
+        }
 
-    .industrial-scene {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: .76;
-      pointer-events: none;
-    }
+        .particle:nth-child(1)  { width: 8px;  height: 8px;  left: 10%; animation-duration: 8s;  animation-delay: 0s;  }
+        .particle:nth-child(2)  { width: 5px;  height: 5px;  left: 25%; animation-duration: 11s; animation-delay: 2s;  }
+        .particle:nth-child(3)  { width: 12px; height: 12px; left: 40%; animation-duration: 7s;  animation-delay: 1s;  }
+        .particle:nth-child(4)  { width: 6px;  height: 6px;  left: 55%; animation-duration: 9s;  animation-delay: 3s;  }
+        .particle:nth-child(5)  { width: 10px; height: 10px; left: 70%; animation-duration: 12s; animation-delay: 0.5s;}
+        .particle:nth-child(6)  { width: 4px;  height: 4px;  left: 85%; animation-duration: 6s;  animation-delay: 4s;  }
+        .particle:nth-child(7)  { width: 7px;  height: 7px;  left: 15%; animation-duration: 10s; animation-delay: 1.5s;}
+        .particle:nth-child(8)  { width: 9px;  height: 9px;  left: 60%; animation-duration: 8.5s;animation-delay: 2.5s;}
+        .particle:nth-child(9)  { width: 5px;  height: 5px;  left: 90%; animation-duration: 13s; animation-delay: 0.8s;}
+        .particle:nth-child(10) { width: 11px; height: 11px; left: 45%; animation-duration: 7.5s;animation-delay: 3.5s;}
 
-    .scene-grid {
-      position: absolute;
-      inset: auto 0 0;
-      height: 39%;
-      opacity: .15;
-      background-image:
-        linear-gradient(rgba(118, 175, 190, .22) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(118, 175, 190, .22) 1px, transparent 1px);
-      background-size: 56px 56px;
-      mask-image: linear-gradient(to top, #000, transparent);
-      transform: perspective(340px) rotateX(48deg) scale(1.4);
-      transform-origin: bottom;
-    }
+        @keyframes float-up {
+            0%   { transform: translateY(110vh) scale(0.5); opacity: 0; }
+            10%  { opacity: 0.08; }
+            90%  { opacity: 0.08; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
 
-    .scene-vignette {
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse at center, transparent 25%, rgba(3, 12, 21, .56) 100%);
-    }
+        /* ===== خطوط النفط المتحركة خلف ===== */
+        .pipe-line {
+            position: absolute;
+            background: rgba(255,255,255,0.04);
+            border-radius: 2px;
+        }
+        .pipe-line.h { height: 3px; width: 100%; animation: pipe-flow-h 4s linear infinite; }
+        .pipe-line.v { width: 3px;  height: 100%; animation: pipe-flow-v 5s linear infinite; }
+        .pipe-line:nth-child(1) { top: 20%; }
+        .pipe-line:nth-child(2) { top: 60%; animation-delay: 1.5s; }
+        .pipe-line:nth-child(3) { top: 80%; animation-delay: 0.8s; }
+        .pipe-line:nth-child(4) { left: 15%; }
+        .pipe-line:nth-child(5) { left: 75%; animation-delay: 2s; }
 
-    .loader-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      width: min(100%, 510px);
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      transform: translateY(-3px);
-    }
+        @keyframes pipe-flow-h {
+            0%   { background-position: -100% 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent); background-size: 40% 100%; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes pipe-flow-v {
+            0%   { background: linear-gradient(180deg, transparent, rgba(255,255,255,0.10), transparent); background-size: 100% 40%; background-position: 0 -100%; }
+            100% { background-position: 0 200%; }
+        }
 
-    .identity-line {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      margin-bottom: 23px;
-      color: rgba(214, 227, 231, .72);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: .13em;
-      animation: rise-in .65s .05s both;
-    }
+        /* ===== المحتوى المركزي ===== */
+        .loader-content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
 
-    .identity-line::before,
-    .identity-line::after {
-      width: 25px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(140, 194, 201, .65));
-      content: "";
-    }
+        /* ===== حاوية الشعار ===== */
+        .flame-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 24px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
 
-    .identity-line::after { transform: rotate(180deg); }
-    .identity-line b { color: #75c3bd; font: 700 10px sans-serif; letter-spacing: .08em; }
+        .flame-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.25);
+            animation: ring-expand 2s ease-out infinite;
+        }
+        .flame-ring:nth-child(2) { animation-delay: 0.7s; border-color: rgba(200,219,233,0.2); }
+        .flame-ring:nth-child(3) { animation-delay: 1.4s; border-color: rgba(255,255,255,0.12); }
 
-    .emblem {
-      position: relative;
-      display: grid;
-      width: 112px;
-      height: 112px;
-      place-items: center;
-      margin-bottom: 24px;
-      border: 1px solid rgba(175, 211, 218, .42);
-      border-radius: 50%;
-      background: linear-gradient(150deg, rgba(193, 224, 226, .13), rgba(17, 45, 61, .36));
-      box-shadow: inset 0 0 32px rgba(171, 213, 214, .08), 0 14px 52px rgba(0, 0, 0, .22);
-      animation: emblem-in .85s .12s both;
-    }
+        @keyframes ring-expand {
+            0%   { transform: scale(0.85); opacity: 0.8; }
+            100% { transform: scale(1.6);  opacity: 0; }
+        }
 
-    .emblem::before,
-    .emblem::after {
-      position: absolute;
-      inset: -9px;
-      border: 1px solid rgba(108, 188, 185, .22);
-      border-radius: 50%;
-      content: "";
-      animation: orbit-in 1s .25s both;
-    }
+        .flame-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    .emblem::after { inset: -17px; border-color: rgba(174, 201, 211, .12); }
+        /* ===== الشعار الجديد ===== */
+        .logo-img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+        }
 
-    .logo-img {
-      display: block;
-      width: 66px;
-      height: 66px;
-      object-fit: contain;
-      filter: drop-shadow(0 4px 15px rgba(186, 221, 222, .35));
-    }
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 18px rgba(200,219,233,0.4)); }
+            50%       { transform: scale(1.06); filter: drop-shadow(0 0 30px rgba(200,219,233,0.7)); }
+        }
 
-    .emblem-mark {
-      position: absolute;
-      right: 4px;
-      bottom: 12px;
-      width: 8px;
-      height: 8px;
-      border: 1px solid #071421;
-      border-radius: 50%;
-      background: #72c9be;
-      box-shadow: 0 0 12px rgba(114, 201, 190, .55);
-    }
+        /* ===== النص ===== */
+        .org-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.2s;
+        }
 
-    .main-title {
-      margin: 0;
-      color: #eff6f6;
-      font-size: clamp(23px, 5.5vw, 35px);
-      font-weight: 900;
-      letter-spacing: -.035em;
-      line-height: 1.45;
-      text-shadow: 0 5px 24px rgba(0, 0, 0, .25);
-      animation: rise-in .68s .29s both;
-    }
+        .main-title {
+            font-size: clamp(20px, 5vw, 28px);
+            font-weight: 900;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.4;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.4s;
+            margin-bottom: 6px;
+        }
 
-    .sub-title {
-      margin-top: 5px;
-      color: #8acdc4;
-      font-size: clamp(16px, 4vw, 20px);
-      font-weight: 700;
-      animation: rise-in .68s .37s both;
-    }
+        .sub-title {
+            font-size: clamp(14px, 3vw, 17px);
+            font-weight: 600;
+            color: rgba(255, 190, 80, 0.95);
+            text-align: center;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.6s;
+            margin-bottom: 40px;
+        }
 
-    .ornament {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      margin: 21px 0 25px;
-      animation: rise-in .68s .44s both;
-    }
+        @keyframes fade-in-up {
+            0%   { opacity: 0; transform: translateY(18px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
-    .ornament-line {
-      width: 59px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(127, 189, 192, .55));
-    }
+        /* ===== شريط التقدم ===== */
+        .progress-wrapper {
+            width: min(320px, 80vw);
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.8s;
+        }
 
-    .ornament-line:last-child { transform: rotate(180deg); }
-    .ornament-node { width: 5px; height: 5px; border: 1px solid #88c9c3; transform: rotate(45deg); }
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
 
-    .progress-wrapper {
-      width: min(330px, 82vw);
-      animation: rise-in .68s .5s both;
-    }
+        .progress-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.55);
+            font-weight: 600;
+        }
 
-    .progress-labels {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 9px;
-      color: #a5b8be;
-      font-size: 11px;
-      font-weight: 600;
-    }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+        }
 
-    .progress-track {
-      position: relative;
-      height: 4px;
-      overflow: hidden;
-      border-radius: 8px;
-      background: rgba(211, 231, 233, .14);
-    }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24, #fcd34d);
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+            animation: progress-fill 2.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 1s;
+        }
 
-    .progress-fill {
-      width: 0%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #76c9be, #c1d5d6);
-      box-shadow: 0 0 12px rgba(113, 201, 191, .38);
-      transition: width .3s ease;
-    }
+        @keyframes progress-fill {
+            0%   { width: 0%; }
+            30%  { width: 35%; }
+            60%  { width: 65%; }
+            85%  { width: 88%; }
+            100% { width: 95%; }
+        }
 
-    .status-text {
-      min-height: 23px;
-      margin: 13px 0 0;
-      color: rgba(197, 214, 217, .74);
-      font-size: 11px;
-      font-weight: 500;
-    }
+        /* شيمر على شريط التقدم */
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+            animation: shimmer 1.5s linear infinite;
+        }
 
-    .continue-button {
-      margin-top: 10px;
-      padding: 7px 14px;
-      border: 1px solid rgba(154, 200, 201, .33);
-      border-radius: 999px;
-      background: rgba(184, 221, 220, .07);
-      color: #d4e7e6;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .2s ease, border-color .2s ease, transform .2s ease;
-    }
+        @keyframes shimmer {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
 
-    .continue-button:hover {
-      transform: translateY(-1px);
-      border-color: rgba(154, 220, 212, .7);
-      background: rgba(184, 221, 220, .13);
-    }
+        /* ===== نص الحالة ===== */
+        .status-text {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 14px;
+            min-height: 18px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 1s;
+        }
 
-    .continue-button:focus-visible { outline: 2px solid #8ad1c7; outline-offset: 3px; }
+        /* ===== الزخرفة السفلية (خط فاصل مزخرف) ===== */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 0.7s;
+        }
 
-    .footer-badge {
-      position: absolute;
-      z-index: 2;
-      bottom: max(30px, env(safe-area-inset-bottom));
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: rgba(170, 193, 198, .57);
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: .04em;
-      animation: rise-in .7s .58s both;
-    }
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,165,0,0.5), transparent);
+            width: 60px;
+        }
 
-    .footer-rule { width: 20px; height: 1px; background: rgba(140, 185, 190, .38); }
-    .footer-badge strong { color: rgba(181, 206, 207, .74); font: 600 9px sans-serif; letter-spacing: .13em; }
+        .divider-diamond {
+            width: 6px;
+            height: 6px;
+            background: #f59e0b;
+            transform: rotate(45deg);
+            box-shadow: 0 0 8px rgba(245,158,11,0.8);
+        }
 
-    @keyframes rise-in {
-      from { opacity: 0; transform: translateY(12px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        /* ===== الشعار السفلي ===== */
+        .footer-badge {
+            position: absolute;
+            bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fade-in-up 0.8s ease both;
+            animation-delay: 1.2s;
+        }
 
-    @keyframes emblem-in {
-      from { opacity: 0; transform: scale(.92); }
-      to { opacity: 1; transform: scale(1); }
-    }
+        .footer-badge span {
+            font-size: 11px;
+            color: rgba(255,255,255,0.35);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
 
-    @keyframes orbit-in {
-      from { opacity: 0; transform: scale(.92); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    @media (max-height: 650px) {
-      .loader-content { transform: scale(.83); }
-      .footer-badge { bottom: max(13px, env(safe-area-inset-bottom)); }
-    }
-
-    @media (max-width: 480px) {
-      .loader-container { padding-inline: 22px; }
-      .loader-container::after { inset: 10px; border-radius: 14px; }
-      .emblem { width: 96px; height: 96px; margin-bottom: 20px; }
-      .logo-img { width: 58px; height: 58px; }
-      .ornament { margin: 17px 0 21px; }
-      .footer-badge { gap: 8px; font-size: 9px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  </style>
+        .footer-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+        }
+    </style>
 </head>
 <body>
-  <main class="salary-app" dir="rtl" lang="ar">
-    <iframe
-      id="myIframe"
-      class="site-frame"
-      title="نظام الاستعلام عن الرواتب - قسم غاز الجنوب"
-      src="https://script.google.com/macros/s/AKfycbzbT3OFCIRljutgpP0XhATpOqW3cKKAtFzWPDPE18vS91bjsdzBrFH59BGNUNBwIUmHpA/exec"
-    ></iframe>
 
-    <section
-      id="loader-container"
-      class="loader-container"
-      aria-hidden="false"
-      aria-label="شاشة بدء نظام الاستعلام عن الرواتب"
-    >
-      <div class="industrial-scene" aria-hidden="true">
-        <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
-          <defs>
-            <linearGradient id="pipeSteel" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#8ba7ae" stop-opacity=".05"></stop>
-              <stop offset=".48" stop-color="#b6d0d3" stop-opacity=".2"></stop>
-              <stop offset="1" stop-color="#5a8992" stop-opacity=".07"></stop>
-            </linearGradient>
-            <linearGradient id="pipeLight" x1="0" x2="1">
-              <stop offset="0" stop-color="#6dc9c0" stop-opacity="0"></stop>
-              <stop offset=".5" stop-color="#9de0d5" stop-opacity=".62"></stop>
-              <stop offset="1" stop-color="#6dc9c0" stop-opacity="0"></stop>
-            </linearGradient>
-          </defs>
-          <g fill="none" stroke="url(#pipeSteel)" stroke-width="18">
-            <path d="M-70 276h255q64 0 64 64v80q0 58 58 58h180"></path>
-            <path d="M1510 194h-228q-64 0-64 64v72q0 61-61 61h-113"></path>
-            <path d="M-20 690h300q54 0 54-54v-32q0-54 54-54h150"></path>
-            <path d="M1495 658h-274q-66 0-66-66v-47q0-50-50-50h-82"></path>
-          </g>
-          <g fill="none" stroke="url(#pipeLight)" stroke-width="2">
-            <path d="M-70 276h255q64 0 64 64v80q0 58 58 58h180"></path>
-            <path d="M1510 194h-228q-64 0-64 64v72q0 61-61 61h-113"></path>
-            <path d="M-20 690h300q54 0 54-54v-32q0-54 54-54h150"></path>
-            <path d="M1495 658h-274q-66 0-66-66v-47q0-50-50-50h-82"></path>
-          </g>
-          <g fill="none" stroke="#a9c1c7" stroke-opacity=".14" stroke-width="2">
-            <path d="M198 266v20m18-20v20m1013-110v20m18-20v20M311 675v20m18-20v20m847-220v20m18-20v20"></path>
-            <circle cx="492" cy="478" r="22"></circle>
-            <circle cx="946" cy="392" r="22"></circle>
-            <path d="M472 478h40m414-86h40M492 456v44m454-108v44"></path>
-          </g>
-        </svg>
-      </div>
-      <div class="scene-grid" aria-hidden="true"></div>
-      <div class="scene-vignette" aria-hidden="true"></div>
+    <!-- ===== شاشة التحميل الاحترافية ===== -->
+    <div id="loader-container">
 
-      <div class="loader-content">
-        <div class="identity-line">
-          <span>السورية للبترول</span>
-          <b dir="ltr">SPC</b>
+        <!-- خلفية الجزيئات -->
+        <div class="bg-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
         </div>
 
-        <div class="emblem">
-          <img
-            class="logo-img"
-            src="https://i.ibb.co/KxqP2H7R/70836-11zon.png"
-            alt="شعار قسم غاز جنوب المنطقة الوسطى"
-          >
-          <span class="emblem-mark"></span>
+        <!-- خطوط الأنابيب -->
+        <div class="pipe-line h" style="top:20%"></div>
+        <div class="pipe-line h" style="top:60%"></div>
+        <div class="pipe-line h" style="top:80%"></div>
+        <div class="pipe-line v" style="left:15%"></div>
+        <div class="pipe-line v" style="left:75%"></div>
+
+        <!-- المحتوى المركزي -->
+        <div class="loader-content">
+
+            <!-- ===== الشعار الجديد (بدل أيقونة اللهب) ===== -->
+            <div class="flame-wrapper">
+                <div class="flame-ring"></div>
+                <div class="flame-ring"></div>
+                <div class="flame-ring"></div>
+                <div class="flame-icon">
+                    <img
+                        class="logo-img"
+                        src="https://i.ibb.co/KxqP2H7R/70836-11zon.png"
+                        alt="شعار قسم غاز جنوب المنطقة الوسطى"
+                    />
+                </div>
+            </div>
+
+            <!-- عنوان الجهة -->
+            <div class="org-title">السورية للبترول - spc</div>
+
+            <!-- العنوان الرئيسي -->
+            <div class="main-title">قسم غاز جنوب المنطقة الوسطى</div>
+
+            <!-- العنوان الفرعي -->
+            <div class="sub-title">نظام الاستعلام عن الرواتب</div>
+
+            <!-- فاصل مزخرف -->
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-diamond"></div>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- شريط التقدم -->
+            <div class="progress-wrapper">
+                <div class="progress-labels">
+                    <span class="progress-label">جارٍ التحميل…</span>
+                    <span class="progress-label" id="pct">0%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+                <div class="status-text" id="status-text">يرجى الانتظار، يتم الاتصال بالنظام</div>
+            </div>
         </div>
 
-        <h1 class="main-title">قسم غاز جنوب المنطقة الوسطى</h1>
-        <div class="sub-title">نظام الاستعلام عن الرواتب</div>
-
-        <div class="ornament" aria-hidden="true">
-          <span class="ornament-line"></span>
-          <span class="ornament-node"></span>
-          <span class="ornament-line"></span>
+        <!-- شارة تذييلية -->
+        <div class="footer-badge">
+            <span>نظام الرواتب الإلكتروني</span>
+            <div class="footer-dot"></div>
+            <span>2026</span>
         </div>
+    </div>
 
-        <div class="progress-wrapper">
-          <div class="progress-labels">
-            <span>جارٍ الاتصال</span>
-            <span id="pct" dir="ltr">0%</span>
-          </div>
-          <div
-            class="progress-track"
-            role="progressbar"
-            aria-label="تقدم تحميل نظام الرواتب"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow="0"
-          >
-            <div id="progress-fill" class="progress-fill"></div>
-          </div>
-          <p id="status-text" class="status-text" aria-live="polite">
-            يرجى الانتظار، يتم الاتصال
-          </p>
-          <button
-            id="continue-button"
-            class="continue-button"
-            type="button"
-            onclick="hideLoader(false, false)"
-          >متابعة</button>
-        </div>
-      </div>
+    <!-- الـ iframe الأصلي -->
+    <iframe id="myIframe"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"
+        src="https://script.google.com/macros/s/AKfycbzbT3OFCIRljutgpP0XhATpOqW3cKKAtFzWPDPE18vS91bjsdzBrFH59BGNUNBwIUmHpA/exec">
+    </iframe>
 
-      <div class="footer-badge">
-        <span>نظام الرواتب الإلكتروني</span>
-        <span class="footer-rule"></span>
-        <strong dir="ltr">2026</strong>
-      </div>
-    </section>
-  </main>
+    <script>
+        // ===== تحديث نسبة التقدم ومسميات الحالة =====
+        var statusMessages = [
+            'يرجى الانتظار، يتم الاتصال بالنظام',
+            'جارٍ التحقق من الصلاحيات…',
+            'يتم تحميل بيانات الرواتب…',
+            'اكتمل التحميل، جارٍ الفتح…'
+        ];
 
-  <script>
-    const pctEl = document.getElementById('pct');
-    const statusEl = document.getElementById('status-text');
-    const fillEl = document.getElementById('progress-fill');
-    const loader = document.getElementById('loader-container');
-    const iframe = document.getElementById('myIframe');
-    const progressTrack = document.querySelector('.progress-track');
-    const continueButton = document.getElementById('continue-button');
-    const startedAt = Date.now();
-    let loaderHidden = false;
+        var pctEl    = document.getElementById('pct');
+        var statusEl = document.getElementById('status-text');
+        var fillEl   = document.getElementById('progress-fill');
+        var loader   = document.getElementById('loader-container');
+        var iframe   = document.getElementById('myIframe');
 
-    const progressTimer = window.setInterval(() => {
-      if (loaderHidden) return;
-      const progress = Math.min(92, Math.round(((Date.now() - startedAt) / 12000) * 92));
-      pctEl.textContent = progress + '%';
-      fillEl.style.width = progress + '%';
-      progressTrack.setAttribute('aria-valuenow', String(progress));
+        // مزامنة نص النسبة مع حركة شريط التقدم
+        var startTime = Date.now();
+        var duration  = 3800; // ms — يتوافق تقريباً مع progress-fill animation
 
-      if (progress < 28) {
-        statusEl.textContent = 'يرجى الانتظار، يتم الاتصال بالنظام';
-      } else if (progress < 58) {
-        statusEl.textContent = 'جارٍ التحقق من الاتصال…';
-      } else {
-        statusEl.textContent = 'يتم تحميل بيانات الرواتب…';
-      }
-    }, 160);
+        function animatePct() {
+            var elapsed  = Date.now() - startTime;
+            var progress = Math.min(elapsed / duration, 1);
+            // منحنى cubic-bezier تقريبي
+            var eased = progress < 0.5
+                ? 2 * progress * progress
+                : -1 + (4 - 2 * progress) * progress;
+            var pct = Math.round(eased * 95);
+            pctEl.textContent = pct + '%';
 
-    function hideLoader(didLoad = true, wasTimeout = false) {
-      if (loaderHidden) return;
-      loaderHidden = true;
-      window.clearInterval(progressTimer);
-      window.clearTimeout(fallbackTimer);
+            // تحديث رسالة الحالة
+            var msgIdx = pct < 30 ? 0 : pct < 55 ? 1 : pct < 80 ? 2 : 3;
+            statusEl.textContent = statusMessages[msgIdx];
 
-      if (didLoad) {
-        pctEl.textContent = '100%';
-        fillEl.style.width = '100%';
-        progressTrack.setAttribute('aria-valuenow', '100');
-        statusEl.textContent = 'تم تحميل النظام، جارٍ الفتح…';
-      } else if (wasTimeout) {
-        statusEl.textContent = 'تعذّر تأكيد اكتمال التحميل. يمكنك متابعة الصفحة.';
-      }
+            if (progress < 1) {
+                requestAnimationFrame(animatePct);
+            }
+        }
+        requestAnimationFrame(animatePct);
 
-      loader.classList.add('is-hidden');
-      loader.setAttribute('aria-hidden', 'true');
-      window.setTimeout(() => {
-        loader.style.display = 'none';
-      }, 760);
-    }
+        // ===== إخفاء شاشة التحميل عند تحميل الـ iframe =====
+        function hideLoader() {
+            pctEl.textContent    = '100%';
+            statusEl.textContent = 'تم التحميل بنجاح ?';
+            fillEl.style.transition = 'width 0.3s ease';
+            fillEl.style.width      = '100%';
 
-    iframe.addEventListener('load', () => hideLoader(true), { once: true });
-    continueButton.addEventListener('click', () => hideLoader(false, false));
+            setTimeout(function () {
+                loader.classList.add('hidden');
+                setTimeout(function () {
+                    loader.style.display = 'none';
+                }, 850);
+            }, 400);
+        }
 
-    const fallbackTimer = window.setTimeout(() => {
-      pctEl.textContent = '92%';
-      fillEl.style.width = '92%';
-      progressTrack.setAttribute('aria-valuenow', '92');
-      hideLoader(false, true);
-    }, 12000);
-  </script>
+        iframe.onload = hideLoader;
+
+        // احتياطي: إخفاء بعد 12 ثانية إذا لم يُطلق onload
+        setTimeout(hideLoader, 12000);
+    </script>
 </body>
 </html>
